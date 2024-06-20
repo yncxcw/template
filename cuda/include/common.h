@@ -1,4 +1,7 @@
+#pragma once
+
 #include <stdio.h>
+#include <cuda_runtime.h>
 
 static void HandleError( cudaError_t err,
                          const char *file,
@@ -9,6 +12,7 @@ static void HandleError( cudaError_t err,
         exit( EXIT_FAILURE );
     }
 }
+
 #define HANDLE_ERROR( err ) (HandleError( err, __FILE__, __LINE__ ))
 
 
