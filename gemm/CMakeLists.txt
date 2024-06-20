@@ -12,7 +12,9 @@ else()
     message(FATAL_ERROR "CUDA Toolkit not found.")
 endif()
 
+add_library(gemm_lib gemm.cu)
 include_directories(include)
 
-add_executable(main_gemm main.cc)
-target_link_libraries(main_gemm CUDA::cudart)
+add_executable(gemm_benchmark main.cc)
+target_link_libraries(gemm_benchmark CUDA::cudart)
+target_link_libraries(gemm_benchmark gemm_lib)
