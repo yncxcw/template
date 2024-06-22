@@ -13,6 +13,7 @@ else()
 endif()
 
 add_library(gemm_lib gemm.cu)
+set_property(TARGET gemm_lib PROPERTY CUDA_ARCHITECTURES 75)
 include_directories(include)
 
 add_executable(gemm_benchmark main.cc)
