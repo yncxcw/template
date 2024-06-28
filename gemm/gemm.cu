@@ -51,8 +51,8 @@ __global__ void cuda_gemm_tiled_shared_memory(const T* A, const T* B, const T* C
             // The x * k: find the row index of the tile in A
             // The i * tile_size: find the index of the tile in A at row x * k
             // The thread_x: find the column index of the element in the tile
-            shared_A[thread_x][thread_y] = A[x * k + i * tile_size + thread_x];
-            shared_B[thread_x][thread_y] = B[(i * tile_size + thread_y) * n + y];
+            shared_A[thread_x][thread_y] = A[x * k + i * tile_size + thread_y];
+            shared_B[thread_x][thread_y] = B[(i * tile_size + thread_x) * n + y];
             __syncthreads();
 
             // Compute the tile

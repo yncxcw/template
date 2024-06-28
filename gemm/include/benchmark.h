@@ -37,26 +37,35 @@ class GemmBenchmarkBase {
 
     virtual void run() = 0;
 
+    void validation() {
+        if (type == GemmType::CPU) {
+            validation_cpu();
+        } else {
+            validation_gpu();
+        }
+        std::cout << "Validation done" << std::endl;
+    }
+
     void validation_cpu() {
         auto D_golden = std::make_unique<T[]>(m * n);
         cpu_gemm(A.get(), B.get(), C.get(), D_golden.get(), m, n, k);
         for (size_t i = 0; i < m * n; i++) {
             auto diff = fabs(D_golden[i] - D[i]);
             if (diff > 1e-5) {
-                std::cerr << "Validation failed at index " << i << " diff " << diff << std::endl;
+                std::cout << "Validation failed at index " << i << " diff " << diff << std::endl;
             }
         }
     }
 
     void validation_gpu() {
         auto D_cpu = std::make_unique<T[]>(m * n);
-        HANDLE_ERROR(cudaMemcpy(D_d.get(), D_cpu.get(), m * n * sizeof(T), cudaMemcpyDeviceToHost));
+        HANDLE_ERROR(cudaMemcpy(D_cpu.get(), D_d.get(), m * n * sizeof(T), cudaMemcpyDeviceToHost));
         auto D_golden = std::make_unique<T[]>(m * n);
         cpu_gemm(A.get(), B.get(), C.get(), D_golden.get(), m, n, k);
         for (size_t i = 0; i < m * n; i++) {
             auto diff = fabs(D_golden[i] - D_cpu[i]);
             if (diff > 1e-5) {
-                std::cerr << "Validation failed at index " << i << " CPU: " << D_golden[i]
+                std::cout << "Validation failed at index " << i << " CPU: " << D_golden[i]
                           << " GPU: " << D_cpu.get()[i] << std::endl;
             }
         }
@@ -99,7 +108,7 @@ class GemmBenchmarkCUDA : public GemmBenchmarkBase<T> {
         : GemmBenchmarkBase<T>(m, n, k, GemmType::CUDA), kernel_name(kernel_name) {}
 
     void run() override {
-        std::cout << "Running GPU CUDA naive GEMM" << std::endl;
+        std::cout << "Running GPU CUDA" << kernel_name << " GEMM" << std::endl;
         Timer timer;
         run_cuda_gemm_kernel<T>(GemmBenchmarkBase<T>::A_d.get(), GemmBenchmarkBase<T>::B_d.get(),
                                 GemmBenchmarkBase<T>::C_d.get(), GemmBenchmarkBase<T>::D_d.get(),
